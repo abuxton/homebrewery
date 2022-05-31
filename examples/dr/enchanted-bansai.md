@@ -1,6 +1,6 @@
 # Enchanted Bansai
 
-Some times in even the most baron and forgotten places you will stumble upon one, it's leaves alive with the colour of the season despite the inhospitable surroundings, or them seamingly being left neglected for decades or more, the quiver of their leaves betraying a hint of their draconic power rooted within. Inversaly sometimes a domantone will be found, seamingly dead left neglected and the slightest sense of magic, a hastily cast spell effect or passing over spray will wake it from this dormant runinous looking state.
+Some times in even the most baron and forgotten places you will stumble upon one, it's leaves alive with the colour of the season despite the inhospitable surroundings, or them seamingly being left neglected for decades or more, the quiver of their leaves betraying a hint of their enchanted power rooted within. Inversaly sometimes a dormant will be found, seamingly dead left neglected and the slightest sense of magic, a hastily cast spell effect or passing over spray will wake it from this dormant runinous looking state.
 
 <div class='artist' style='top:90px;right:30px;'>
 ##### Dragonlef Tree
