@@ -1,0 +1,40 @@
+# Development Docker Compose
+# Runs the Homebrewery app with Vite HMR enabled (NODE_ENV=local) alongside MongoDB.
+# Source code is bind-mounted so edits on the host are reflected immediately.
+#
+# Usage:
+#   docker compose -f docker-compose.dev.yml up
+#   # Then open http://localhost:8000 in your browser
+
+services:
+  mongodb:
+    image: mongo:8.0
+    volumes:
+      - mongodata:/data/db
+    ports:
+      - "27017:27017"
+    restart: unless-stopped
+
+  app:
+    image: node:22-alpine
+    working_dir: /usr/src/app
+    volumes:
+      # Bind-mount the source so file edits are picked up without rebuilding
+      - .:/usr/src/app:cached
+      # Keep node_modules inside a named volume to avoid host/container conflicts
+      - node_modules:/usr/src/app/node_modules
+    environment:
+      - NODE_ENV=local
+      - MONGODB_URI=mongodb://mongodb:27017/homebrewery
+    ports:
+      - "8000:8000"
+    # Only install dependencies when node_modules is empty (first run or after volume removal).
+    # When NODE_ENV=local the server boots Vite in middleware mode (HMR enabled).
+    command: sh -c "[ -d node_modules/.bin ] || npm install --ignore-scripts; npm start"
+    depends_on:
+      - mongodb
+    restart: unless-stopped
+
+volumes:
+  mongodata:
+  node_modules:

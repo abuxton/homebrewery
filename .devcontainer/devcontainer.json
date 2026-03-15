@@ -1,0 +1,36 @@
+{
+	"name": "Homebrewery Dev Container",
+	"dockerComposeFile": "docker-compose.devcontainer.yml",
+	"service": "app",
+	"workspaceFolder": "/workspace",
+
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"dbaeumer.vscode-eslint",
+				"esbenp.prettier-vscode",
+				"mongodb.mongodb-vscode",
+				"ms-vscode.vscode-js-debug",
+				"streetsidesoftware.code-spell-checker"
+			],
+			"settings": {
+				"terminal.integrated.defaultProfile.linux": "sh"
+			}
+		}
+	},
+
+	"forwardPorts": [8000],
+	"portsAttributes": {
+		"8000": {
+			"label": "Homebrewery App",
+			"onAutoForward": "openPreview"
+		}
+	},
+
+	"postCreateCommand": "npm install",
+
+	"remoteEnv": {
+		"NODE_ENV": "local",
+		"MONGODB_URI": "mongodb://mongodb:27017/homebrewery"
+	}
+}
