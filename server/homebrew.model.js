@@ -1,29 +1,35 @@
-const mongoose = require('mongoose');
-const { nanoid } = require('nanoid');
-const _ = require('lodash');
-const zlib = require('zlib');
+import mongoose   from 'mongoose';
+import { nanoid } from 'nanoid';
+import _          from 'lodash';
+import zlib       from 'zlib';
+
 
 const HomebrewSchema = mongoose.Schema({
 	shareId   : { type: String, default: ()=>{return nanoid(12);}, index: { unique: true } },
 	editId    : { type: String, default: ()=>{return nanoid(12);}, index: { unique: true } },
-	title     : { type: String, default: '' },
+	googleId  : { type: String, index: true },
+	title     : { type: String, default: '', index: true },
 	text      : { type: String, default: '' },
 	textBin   : { type: Buffer },
-	pageCount : { type: Number, default: 1 },
+	pageCount : { type: Number, default: 1, index: true },
 
-	description : { type: String, default: '' },
-	tags        : { type: String, default: '' },
-	systems     : [String],
-	renderer    : { type: String, default: '' },
-	authors     : [String],
-	published   : { type: Boolean, default: false },
-	thumbnail   : { type: String, default: '' },
+	description    : { type: String, default: '' },
+	tags           : { type: [String], index: true },
+	systems		   : { type: [String], default: undefined },
+	lang           : { type: String, default: 'en', index: true },
+	renderer       : { type: String, default: '', index: true },
+	authors        : { type: [String], index: true },
+	invitedAuthors : [String],
+	published      : { type: Boolean, default: false, index: true },
+	thumbnail      : { type: String, default: '', index: true },
 
-	createdAt  : { type: Date, default: Date.now },
-	updatedAt  : { type: Date, default: Date.now },
-	lastViewed : { type: Date, default: Date.now },
+	createdAt  : { type: Date, default: Date.now, index: true },
+	updatedAt  : { type: Date, default: Date.now, index: true },
+	lastViewed : { type: Date, default: Date.now, index: true },
 	views      : { type: Number, default: 0 },
-	version    : { type: Number, default: 1 }
+	version    : { type: Number, default: 1, index: true },
+
+	lock : { type: Object, index: true }
 }, { versionKey: false });
 
 HomebrewSchema.statics.increaseView = async function(query) {
@@ -37,37 +43,40 @@ HomebrewSchema.statics.increaseView = async function(query) {
 	return brew;
 };
 
-HomebrewSchema.statics.get = function(query, fields=null){
-	return new Promise((resolve, reject)=>{
-		Homebrew.find(query, fields, null, (err, brews)=>{
-			if(err || !brews.length) return reject('Can not find brew');
-			if(!_.isNil(brews[0].textBin)) {			// Uncompress zipped text field
-				unzipped = zlib.inflateRawSync(brews[0].textBin);
-				brews[0].text = unzipped.toString();
-			}
-			if(!brews[0].renderer)
-				brews[0].renderer = 'legacy';
-			return resolve(brews[0]);
-		});
-	});
+// STATIC FUNCTIONS
+
+HomebrewSchema.statics.get = async function(query, fields=null){
+	const brew = await Homebrew.findOne(query, fields).orFail()
+		.catch((error)=>{throw 'Can not find brew';});
+	if(!_.isNil(brew.textBin)) {			// Uncompress zipped text field
+		const unzipped = zlib.inflateRawSync(brew.textBin);
+		brew.text = unzipped.toString();
+	}
+	return brew;
 };
 
-HomebrewSchema.statics.getByUser = function(username, allowAccess=false, fields=null){
-	return new Promise((resolve, reject)=>{
-		const query = { authors: username, published: true };
-		if(allowAccess){
-			delete query.published;
-		}
-		Homebrew.find(query, fields).lean().exec((err, brews)=>{ //lean() converts results to JSObjects
-			if(err) return reject('Can not find brew');
-			return resolve(brews);
-		});
-	});
+HomebrewSchema.statics.getByUser = async function(username, allowAccess=false, fields=null, filter=null){
+	const query = { authors: username, published: true, ...filter };
+	if(allowAccess){
+		delete query.published;
+	}
+	const brews = await Homebrew.find(query, fields).lean().exec() //lean() converts results to JSObjects
+		.catch((error)=>{throw 'Can not find brews';});
+	return brews;
 };
+
+// INDEXES
+
+HomebrewSchema.index({ updatedAt: -1, lastViewed: -1 });
+HomebrewSchema.index({ published: 1, title: 'text' });
+
+HomebrewSchema.index({ lock: 1, sparse: true });
+HomebrewSchema.path('lock.reviewRequested').index({ sparse: true });
+
 
 const Homebrew = mongoose.model('Homebrew', HomebrewSchema);
 
-module.exports = {
-	schema : HomebrewSchema,
-	model  : Homebrew,
+export {
+	HomebrewSchema as schema,
+	Homebrew       as model
 };

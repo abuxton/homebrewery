@@ -5,12 +5,12 @@
 // reused by both the main application and all tests which require database
 // connection.
 
-const Mongoose = require('mongoose');
+import Mongoose from 'mongoose';
 
 const getMongoDBURL = (config)=>{
 	return config.get('mongodb_uri') ||
            config.get('mongolab_uri') ||
-           'mongodb://localhost/homebrewery';
+		   'mongodb://127.0.0.1/homebrewery';  // changed from mongodb://localhost/homebrewery to accommodate versions 16+ of node.
 };
 
 const handleConnectionError = (error)=>{
@@ -22,16 +22,29 @@ const handleConnectionError = (error)=>{
 	}
 };
 
+const addListeners = (conn)=>{
+	conn.connection.on('disconnecting', ()=>{console.log('Mongo disconnecting...');});
+	conn.connection.on('disconnected', ()=>{console.log('Mongo disconnected!');});
+	conn.connection.on('connecting', ()=>{console.log('Mongo connecting...');});
+	conn.connection.on('connected', ()=>{console.log('Mongo connected!');});
+	return conn;
+};
+
 const disconnect = async ()=>{
 	return await Mongoose.disconnect();
 };
 
 const connect = async (config)=>{
-	return await Mongoose.connect(getMongoDBURL(config),
-		{ retryWrites: false }, handleConnectionError);
+	return await Mongoose.connect(getMongoDBURL(config), {
+		retryWrites : false,
+		autoIndex   : (config.get('local_environments').includes(config.get('node_env')))
+	})
+	.then(addListeners(Mongoose))
+	.catch((error)=>handleConnectionError(error));
 };
 
-module.exports = {
-	connect    : connect,
-	disconnect : disconnect
+export default {
+	connect,
+	disconnect
 };
+

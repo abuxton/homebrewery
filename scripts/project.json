@@ -15,6 +15,7 @@
 		"codemirror/addon/fold/foldcode.js",
 		"codemirror/addon/fold/foldgutter.js",
 		"codemirror/addon/fold/xml-fold.js",
+		"codemirror/addon/scroll/scrollpastend.js",
 		"codemirror/addon/search/search.js",
 		"codemirror/addon/search/searchcursor.js",
 		"codemirror/addon/search/jump-to-line.js",
@@ -24,8 +25,10 @@
 		"codemirror/addon/edit/closetag.js",
 		"codemirror/addon/edit/trailingspace.js",
 		"codemirror/addon/selection/active-line.js",
+		"codemirror/addon/hint/show-hint.js",
 		"moment",
 		"superagent",
-		"marked"
+		"@sanity/diff-match-patch",
+		"fflate"
 	]
 }
