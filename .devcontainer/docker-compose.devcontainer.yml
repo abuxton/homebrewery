@@ -1,0 +1,25 @@
+services:
+  app:
+    image: node:22-alpine
+    # Install git so VS Code source-control features work inside the container
+    command: sh -c "apk add --no-cache git && sleep infinity"
+    volumes:
+      - ..:/workspace:cached
+    working_dir: /workspace
+    environment:
+      - NODE_ENV=local
+      - MONGODB_URI=mongodb://mongodb:27017/homebrewery
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mongodb
+
+  mongodb:
+    image: mongo:8.0
+    volumes:
+      - mongodata:/data/db
+    ports:
+      - "27017:27017"
+
+volumes:
+  mongodata:

@@ -2,7 +2,7 @@
 
 These instructions are for setting up a persistent instance of the Homebrewery application locally using Docker.
 
-If you intend to develop with Homebrewery, following the Homebrewery application section of this guide is not recommended. Using docker to deploy MongoDB locally for development is not a bad idea at all, however.
+If you intend to **develop** with Homebrewery, see the [Development Containers](#development-containers) section below instead of the production install steps. Using Docker to deploy MongoDB locally for development is also a great approach; a ready-made dev Compose file is provided.
 
 # Install Docker
 
@@ -127,4 +127,79 @@ docker run --name homebrewery-app -d --restart unless-stopped -e NODE_ENV=docker
 # Make sure you run this in the homebrewery directory
 docker run --name homebrewery-app -d --restart unless-stopped -e NODE_ENV=docker -v %cd%/config/docker.json:/usr/src/app/config/docker.json -p 8000:8000 docker.io/library/homebrewery:latest
 ```
+
+---
+
+# Development Containers
+
+Two approaches are provided for running Homebrewery inside Docker during active development. Both mount your source tree into the container so that edits are immediately reflected without a full image rebuild. The server boots with `NODE_ENV=local`, which enables Vite in middleware mode (Hot Module Replacement).
+
+## Option A — VS Code Dev Container / GitHub Codespaces
+
+The `.devcontainer/` folder contains the full configuration required by [VS Code Dev Containers](https://code.visualstudio.com/docs/devcontainers/containers) and [GitHub Codespaces](https://github.com/features/codespaces).
+
+### Prerequisites
+- [VS Code](https://code.visualstudio.com/) with the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) installed, **or** a GitHub Codespaces account.
+- Docker Desktop / Docker Engine running locally (VS Code only).
+
+### Usage
+
+**VS Code:**
+1. Open the repository folder in VS Code.
+2. When prompted *"Reopen in Container"*, click **Reopen in Container**.  
+   Alternatively, open the Command Palette (`Ctrl+Shift+P`) and run **Dev Containers: Reopen in Container**.
+3. VS Code rebuilds the container, installs Node dependencies (`npm install`), and attaches.
+4. In the integrated terminal, start the application:
+   ```shell
+   npm start
+   ```
+5. Retrieve the URL using either method below:
+   - **Terminal link** — after `npm start` the server prints a line like `Open in browser: http://localhost:8000`. Ctrl+click (or Cmd+click on Mac) that link; VS Code automatically rewrites it to the forwarded address.
+   - **Ports panel** — click the **Ports** tab in the bottom panel (next to Terminal). Find port `8000`; hover over the *Forwarded Address* column and click the globe 🌐 icon to open the app in your browser. The address is also displayed there if you need to copy it.
+
+**GitHub Codespaces:**
+1. Click **Code → Codespaces → Create codespace on this branch** in the GitHub UI.
+2. Once the codespace is ready, run `npm start` in the terminal.
+3. Retrieve the URL using either method below:
+   - **Terminal notification** — a toast popup appears in the bottom-right corner reading *"Your application running on port 8000 is available"*. Click **Open in Browser** to launch it, or **Copy Link** to copy the HTTPS URL.
+   - **Ports panel** — click the **Ports** tab (or run **Codespaces: Focus on Ports View** from the Command Palette). Find port `8000`; the full HTTPS URL (format: `https://<codespace-name>-8000.app.github.dev`) is shown in the *Forwarded Address* column. Click the globe 🌐 icon to open it, or click the copy icon to copy the URL.
+   - **CLI** — if you are using the `gh` CLI, run:
+     ```shell
+     gh codespace ports --codespace <codespace-name>
+     ```
+     This lists all forwarded ports and their public URLs.
+
+### What the dev container provides
+- Node 22 (Alpine) runtime matching the production image.
+- MongoDB service reachable at `mongodb://mongodb:27017/homebrewery`.
+- VS Code extensions: ESLint, Prettier, MongoDB for VS Code, JS Debugger, Code Spell Checker.
+- Source tree bind-mounted at `/workspace`.
+
+---
+
+## Option B — Standalone Development Compose
+
+If you prefer to work in your local editor without VS Code's Dev Containers feature, `docker-compose.dev.yml` provides an equivalent environment.
+
+```shell
+# Start MongoDB + the Homebrewery dev server (Vite HMR enabled)
+docker compose -f docker-compose.dev.yml up
+```
+
+The first start may take a minute while `npm install` runs inside the container. Subsequent starts reuse the cached `node_modules` volume and are much faster.
+
+Open [http://localhost:8000](http://localhost:8000) in your browser.
+
+### Stopping the dev environment
+
+```shell
+docker compose -f docker-compose.dev.yml down
+```
+
+To also remove the persistent MongoDB data volume:
+
+```shell
+docker compose -f docker-compose.dev.yml down -v
+```
+
 
