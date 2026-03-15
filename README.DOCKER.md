@@ -153,12 +153,21 @@ The `.devcontainer/` folder contains the full configuration required by [VS Code
    ```shell
    npm start
    ```
-5. VS Code forwards port `8000` automatically. Open the **Ports** panel or click the link in the terminal to view the running app.
+5. Retrieve the URL using either method below:
+   - **Terminal link** — after `npm start` the server prints a line like `Open in browser: http://localhost:8000`. Ctrl+click (or Cmd+click on Mac) that link; VS Code automatically rewrites it to the forwarded address.
+   - **Ports panel** — click the **Ports** tab in the bottom panel (next to Terminal). Find port `8000`; hover over the *Forwarded Address* column and click the globe 🌐 icon to open the app in your browser. The address is also displayed there if you need to copy it.
 
 **GitHub Codespaces:**
 1. Click **Code → Codespaces → Create codespace on this branch** in the GitHub UI.
 2. Once the codespace is ready, run `npm start` in the terminal.
-3. Codespaces makes port `8000` available via a forwarded HTTPS URL shown in the **Ports** panel.
+3. Retrieve the URL using either method below:
+   - **Terminal notification** — a toast popup appears in the bottom-right corner reading *"Your application running on port 8000 is available"*. Click **Open in Browser** to launch it, or **Copy Link** to copy the HTTPS URL.
+   - **Ports panel** — click the **Ports** tab (or run **Codespaces: Focus on Ports View** from the Command Palette). Find port `8000`; the full HTTPS URL (format: `https://<codespace-name>-8000.app.github.dev`) is shown in the *Forwarded Address* column. Click the globe 🌐 icon to open it, or click the copy icon to copy the URL.
+   - **CLI** — if you are using the `gh` CLI, run:
+     ```shell
+     gh codespace ports --codespace <codespace-name>
+     ```
+     This lists all forwarded ports and their public URLs.
 
 ### What the dev container provides
 - Node 22 (Alpine) runtime matching the production image.
