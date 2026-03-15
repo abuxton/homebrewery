@@ -1,48 +1,25 @@
-require('./errorPage.less');
-const React = require('react');
-const createClass = require('create-react-class');
-const _ = require('lodash');
-const cx = require('classnames');
+import './errorPage.less';
+import React      from 'react';
+import UIPage     from '../basePages/uiPage/uiPage.jsx';
+import Markdown   from '@shared/markdown.js';
+import ErrorIndex from './errors/errorIndex.js';
 
-const Nav = require('naturalcrit/nav/nav.jsx');
-const Navbar = require('../../navbar/navbar.jsx');
-const PatreonNavItem = require('../../navbar/patreon.navitem.jsx');
-const RecentNavItem = require('../../navbar/recent.navitem.jsx').both;
-const HelpNavItem = require('../../navbar/help.navitem.jsx');
+const ErrorPage = ({ brew })=>{
+	// Retrieving the error text based on the brew's error code from ErrorIndex
+	const errorText = ErrorIndex({ brew })[brew.HBErrorCode.toString()] || '';
 
-const BrewRenderer = require('../../brewRenderer/brewRenderer.jsx');
-
-const ErrorPage = createClass({
-	getDefaultProps : function() {
-		return {
-			ver     : '0.0.0',
-			errorId : ''
-		};
-	},
-
-	text : '# Oops \n We could not find a brew with that id. **Sorry!**',
-
-	render : function(){
-		return <div className='errorPage sitePage'>
-			<Navbar ver={this.props.ver}>
-				<Nav.section>
-					<Nav.item className='errorTitle'>
-						Crit Fail!
-					</Nav.item>
-				</Nav.section>
-
-				<Nav.section>
-					<PatreonNavItem />
-					<HelpNavItem />
-					<RecentNavItem />
-				</Nav.section>
-			</Navbar>
-
-			<div className='content'>
-				<BrewRenderer text={this.text} />
+	return (
+		<UIPage brew={{ title: 'Crit Fail!' }}>
+			<div className='dataGroup'>
+				<div className='errorTitle'>
+					<h1>{`Error ${brew?.status || '000'}`}</h1>
+					<h4>{brew?.text || 'No error text'}</h4>
+				</div>
+				<hr />
+				<div dangerouslySetInnerHTML={{ __html: Markdown.render(errorText) }} />
 			</div>
-		</div>;
-	}
-});
+		</UIPage>
+	);
+};
 
-module.exports = ErrorPage;
+export default ErrorPage;

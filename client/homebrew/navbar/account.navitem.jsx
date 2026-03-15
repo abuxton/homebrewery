@@ -1,9 +1,9 @@
-const React = require('react');
-const createClass = require('create-react-class');
-const Nav = require('naturalcrit/nav/nav.jsx');
-const request = require('superagent');
+import React from 'react';
+import createReactClass from 'create-react-class';
+import request from 'superagent';
+import Nav from './nav.jsx';
 
-const Account = createClass({
+const Account = createReactClass({
 	displayName     : 'AccountNavItem',
 	getInitialState : function() {
 		return {
@@ -63,18 +63,26 @@ const Account = createClass({
 		if(global.account){
 			return <Nav.dropdown>
 				<Nav.item
-					className='account'
+					className='account username'
 					color='orange'
 					icon='fas fa-user'
 				>
 					{global.account.username}
 				</Nav.item>
 				<Nav.item
-					href={`/user/${global.account.username}`}
+					href={`/user/${encodeURIComponent(global.account.username)}`}
 					color='yellow'
 					icon='fas fa-beer'
 				>
 					brews
+				</Nav.item>
+				<Nav.item
+					className='account'
+					color='orange'
+					icon='fas fa-user'
+					href='/account'
+				>
+					account
 				</Nav.item>
 				<Nav.item
 					className='logout'
@@ -89,7 +97,7 @@ const Account = createClass({
 
 		//  Logged out
 		//  LOCAL ONLY
-		if(global.config.local) {
+		if(global.config?.local) {
 			return <Nav.item color='teal' icon='fas fa-sign-in-alt' onClick={this.localLogin}>
 				login
 			</Nav.item>;
@@ -103,4 +111,4 @@ const Account = createClass({
 	}
 });
 
-module.exports = Account;
+export default Account;
